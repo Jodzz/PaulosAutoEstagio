@@ -1,0 +1,1098 @@
+﻿@model PaulosAutoWithAPI.Models.DetalhesEquipamento
+
+@{
+    Equipamento equipamento = Model.equipamento;
+
+    ViewData["Title"] = "Equipamento " + equipamento.serialNumber;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var count = 0; //para os id's dos modal
+}
+
+    <style>
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5) !important;
+    }
+
+    /*para box-shadow do file input*/
+    .form-control:focus + label {
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5) !important;
+    }
+
+    .dropdown-item {
+        font-size: .875rem;
+    }
+
+    .dropdown-menu {
+        margin-top: -.5px;
+    }
+
+    .dropdown-item {
+        cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(220,53,69, .5);
+    }
+
+    /*muda o texto do file input para Procurar*/
+    #inputFile:lang(pt) ~ .custom-file-label::after {
+        content: "Procurar";
+    }
+
+    #inputFileMobile:lang(pt) ~ .custom-file-label::after {
+        content: "Procurar";
+    }
+
+    h6 {
+        font-size: .8rem;
+    }
+    </style>
+
+<ul class="nav nav-tabs mb-3" id="maquinaTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link text-dark active" id="info-tab" data-toggle="tab" href="#info" role="tab" 
+           aria-controls="info" aria-selected="true">Informação</a>
+    </li>
+    @{
+        if (Model.acessoHist)
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" id="hist-tab" data-toggle="tab" href="#hist" role="tab" 
+                   aria-controls="hist" aria-selected="false">Histórico</a>
+            </li>
+        }
+    }
+</ul>
+
+<p id="error400" role="alert" class="alert alert-danger d-none erros text-center">Os dados inseridos estão incorretos.</p>
+<p id="error404" role="alert" class="alert alert-danger d-none erros text-center">De momento não é possível aceder ao servidor.</p>
+
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+        <div id="web-card" class="card shadow-sm border-light p-3 mt-5">
+            <div class="row no-gutters">
+                <div class="col-5 border-right border-black-50">
+                    <img class="rounded" src="@equipamento.image" style="max-width:430px; height:328px;" />
+                </div>
+                <div class="col-7">
+                    <div class="card-body text-justify pt-0 pb-0 pl-5">
+                        <h2 class="font-weight-bold">@equipamento.model &nbsp; . &nbsp; @equipamento.serialNumber</h2>
+                        <h3 class="font-weight-bold mt-5">Características</h3>
+                        <table class="col-12 mt-3">
+                            <tr>
+                                <td>
+                                    Marca
+                                </td>
+                                <td>
+                                    @equipamento.brand
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Matricula
+                                </td>
+                                <td>
+                                    @{
+                                        if (!String.IsNullOrEmpty(equipamento.plate))
+                                        {
+                                            @equipamento.plate;
+                                        }
+                                        else
+                                        {
+                                            var plate = "Indisponível.";
+                                            @plate;
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Nº de Horas
+                                </td>
+                                <td>
+                                    @equipamento.currentHours
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="row pt-2">
+                            <div class="modal fade" id="horasModal" tabindex="-1" role="dialog" aria-labelledby="horasModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="horasModalLabel">Registo de Utilização</h5>
+                                            <button type="button" id="closeHoras" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form id="equip_horas_form" asp-action="EnvioHoras" method="POST">
+                                            <div class="modal-body">
+                                                <p id="inputCheck" role="alert" class="alert alert-danger d-none text-center">Insira um número de horas superior ao atual.</p>
+                                                <div class="input-group flex-nowrap">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text border-danger" id="addon-wrapping">Número de Horas</span>
+                                                    </div>
+                                                    <input type="number" id="equip_horas" name="equip_horas" class="form-control border-danger" aria-label="Horas" aria-describedby="addon-wrapping" required>
+                                                    <input type="text" name="id_equip_horas" class="form-control d-none" aria-describedby="addon-wrapping" value=@equipamento.serialNumber readonly>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button id="equip_horas_btn" type="submit" class="btn btn-outline-danger" disabled>Gravar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @{
+                                if (Model.acessoHoras)
+                                {
+                                    <button class="btn btn-outline-danger col-6 mt-5" data-toggle="modal" data-target="#horasModal">
+                                        Registar Utilização
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-outline-danger col-6 mt-5" data-toggle="modal" data-target="#horasModal" disabled>
+                                        Registar Utilização
+                                    </button>
+                                }
+                            }
+
+                            <div class="modal fade" id="avariaModal" tabindex="-1" role="dialog" aria-labelledby="avariaModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="horasModalLabel">Registo de Avaria</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form id="equip_avarias_form" asp-action="EnvioAvaria" method="POST" enctype="multipart/form-data">
+                                            <div class="modal-body">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text border-danger">Descrição do Problema</span>
+                                                    </div>
+                                                    <textarea class="form-control border-danger" id="descAvaria" name="descAvaria" aria-label="With textarea" required></textarea>
+                                                    <input class="form-control d-none" name="sNumAvaria" type="text" value="@equipamento.serialNumber" readonly>
+                                                    <div class="input-group mt-3">
+                                                        <div class="custom-file">
+                                                            <input type="file" name="imagensAvaria[]" class="custom-file-input form-control border-danger" lang="pt" id="inputFile" multiple>
+                                                            <label class="custom-file-label form-control border-danger" for="inputFile">Carregar Imagem e/ou Vídeos</label>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="text-muted mb-0" style="margin-top:.25rem">Apenas aceita imagens e vídeos.</h6>
+                                                    <h6 class="text-muted">Pressione "CTRL" para selecional vários ficheiros.</h6>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer clearfix">
+                                                <button id="avaria_btn" type="submit" class="btn btn-outline-danger float-right" disabled>Gravar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @{
+                                if (Model.acessoHoras)
+                                {
+                                    <button class="btn btn-outline-danger offset-1 col-4 mt-5" data-toggle="modal" data-target="#avariaModal">
+                                        Registar Avaria
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-outline-danger offset-1 col-4 mt-5" data-toggle="modal" data-target="#avariaModal" disabled>
+                                        Registar Avaria
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-card" class="card shadow-sm border-light p-3 d-none">
+            <div class="card-header p-0 mb-3">
+                <img class="card-img-top" src="@equipamento.image" />
+            </div>
+            <div class="card-body text-justify pb-0 border-top border-black-50">
+                <h2 class="font-weight-bold">@equipamento.model</h2>
+                <h5 class="font-weight-bold">@equipamento.serialNumber</h5>
+                <h6 class="font-weight-bold">Características</h6>
+                <table class="col-12">
+                    <tr>
+                        <td>
+                            Marca
+                        </td>
+                        <td>
+                            @equipamento.brand
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Matricula
+                        </td>
+                        <td>
+                            @{
+                                if (!String.IsNullOrEmpty(equipamento.plate))
+                                {
+                                    @equipamento.plate;
+                                }
+                                else
+                                {
+                                    var plate = "Indisponível.";
+                                    @plate;
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Nº de Horas
+                        </td>
+                        <td>
+                            @equipamento.currentHours
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row pt-2">
+                    <div class="modal fade" id="horasModalmobile" tabindex="-1" role="dialog" aria-labelledby="horasModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="horasModalLabel">Registo de Utilização</h5>
+                                    <button type="button" id="closeHorasmobile" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="equip_horas_form_mobile" asp-action="EnvioHoras" method="POST">
+                                    <div class="modal-body">
+                                        <p id="inputCheckmobile" role="alert" class="alert alert-danger d-none text-center">Insira um número de horas superior ao atual.</p>
+                                        <div class="input-group flex-nowrap">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text border-danger" id="addon-wrapping">Número de Horas</span>
+                                            </div>
+                                            <input type="text" id="equip_horas_mobile" name="equip_horas_mobile" class="form-control border-danger" aria-label="Horas" aria-describedby="addon-wrapping" required>
+                                            <input type="text" id="id_equip_horas_mobile" name="id_equip_horas_mobile" class="form-control d-none" aria-describedby="addon-wrapping" value=@equipamento.serialNumber readonly>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button id="equip_horas_btn_mobile" type="submit" class="btn btn-outline-danger">Gravar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    @{
+                        if (Model.acessoHoras)
+                        {
+                            <button class="btn btn-outline-danger col-6" data-toggle="modal" data-target="#horasModalmobile">
+                                Registar Utilização
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-danger col-6" data-toggle="modal" data-target="#horasModalmobile" disabled>
+                                Registar Utilização
+                            </button>
+                        }
+                    }
+
+                    <div class="modal fade" id="avariaModalmobile" tabindex="-1" role="dialog" aria-labelledby="avariaModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="horasModalLabel">Registo de Avaria</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="equip_avarias_form_mobile" asp-action="EnvioAvaria" method="POST" enctype="multipart/form-data">
+                                    <div class="modal-body">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text border-danger">Descrição do Problema</span>
+                                            </div>
+                                            <textarea class="form-control border-danger" id="descAvariaMobile" name="descAvariaMobile" aria-label="With textarea" required></textarea>
+                                            <input class="form-control d-none" name="sNumAvariaMobile" type="text" value="@equipamento.serialNumber" readonly>
+                                            <div class="input-group mt-3">
+                                                <div class="custom-file">
+                                                    <input type="file" name="imagensAvariaMobile" class="form-control border-danger custom-file-input" lang="pt" id="inputFileMobile" multiple>
+                                                    <label class="custom-file-label form-control border-danger" for="inputFileMobile">Carregar Imagem e/ou Vídeos</label>
+                                                </div>
+                                            </div>
+                                            <h6 class="text-muted mb-0" style="margin-top:.25rem">Apenas aceita imagens e vídeos.</h6>
+                                            <h6 class="text-muted">Pressione "CTRL" para selecional vários ficheiros.</h6>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" id="avaria_btn_mobile" class="btn btn-outline-danger" disabled>Gravar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    @{
+                        if (Model.acessoHoras)
+                        {
+                            <button class="btn btn-outline-danger col-6" data-toggle="modal" data-target="#avariaModalmobile">
+                                Registar Avaria
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-danger col-6" data-toggle="modal" data-target="#avariaModalmobile" disabled>
+                                Registar Avaria
+                            </button>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="hist" role="tabpanel" aria-labelledby="hist-tab">
+        @if (Model.listaDates.Count == 0)
+        {
+            <h4 class="border-bottom border-danger mb-3">Histórico</h4>
+            <h4>Não há atividade relativa a esta máquina.</h4>
+        }
+        else
+        {
+            <form id="dataFilter" class="row offset-10 clearfix">
+                <div class="input-group input-group-sm">
+                    <div class="dropdown col-12">
+                        <button class="btn btn-outline-danger dropdown-toggle text-muted col-12" type="button" id="dropdownMenu" aria-haspopup="true" aria-expanded="false">
+                            Selecionar Data
+                        </button>
+                        <div id="menu" class="dropdown-menu w-100 shadow">
+                            <div id="all" class="dropdown-item text-muted p-2">Mostrar Tudo</div>
+                            <div id="lastweek" class="dropdown-item text-muted p-2">Última Semana</div>
+                            <div id="lastmonth" class="dropdown-item text-muted p-2">Último Mês</div>
+                            <div id="lastyear" class="dropdown-item text-muted p-2">Ultimo Ano</div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            @foreach (var hrs in Model.listaDates)
+            {
+                <h4 class="border-bottom border-danger mb-3">@hrs.ToString("dd/MM/yyyy")</h4>
+
+                @foreach (var hour in Model.listaHoras)
+                {
+                    if (hour.key.ToString("dd/MM/yyyy").Equals(hrs.ToString("dd/MM/yyyy")))
+                    {
+                        <div class="card histCard shadow-sm border-light pl-0 pt-3 pr-0 pb-3 col-5 d-inline-block mb-3 ml-5 mr-4">
+                            <div class="row no-gutters">
+                                <div class="col-5 text-center border-right border-black-50">
+                                    <i class="fas fa-clock text-success fa-5x"></i>
+                                    <br />
+                                    <p class="font-weight-bold mb-0 mt-3">@equipamento.serialNumber</p>
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body text-left pt-0 pb-0 pl-3">
+                                        <h4 class="font-weight-bold">Utilização</h4>
+
+                                        <span class="font-weight-bold">Data: <span class="font-weight-normal cardDate">@hour.key.ToString("dd/MM/yyyy")</span></span>
+                                        <br />
+                                        <span class="font-weight-bold">Nº de Horas: <span class="font-weight-normal">@hour.value</span></span>
+                                        <br />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @foreach (var intervencoes in Model.listaIntervencoes)
+                {
+                    foreach (var inter in intervencoes.intervencoes)
+                    {
+                        count++;
+
+                        if (inter.data.ToString("dd/MM/yyyy").Equals(hrs.ToString("dd/MM/yyyy")))
+                        {
+                            <div class="card histCard shadow-sm border-light pl-0 pt-3 pr-0 pb-3 col-5 d-inline-block mb-3 ml-5 mr-4">
+                                <div class="row no-gutters">
+                                    <div class="col-5 text-center border-right border-black-50">
+                                        <i class="fas fa-tools text-warning fa-5x"></i>
+                                        <br />
+                                        <p class="font-weight-bold mb-0 mt-3">@equipamento.serialNumber</p>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="card-body text-left pt-0 pb-0 pl-3">
+                                            <h4 class="font-weight-bold">Intervenção</h4>
+
+                                            <span class="font-weight-bold">Data: <span class="font-weight-normal cardDate">@inter.data.ToString("dd/MM/yyyy")</span></span>
+                                            <br />
+                                            @{var final = "";
+                                                if (@intervencoes.finalizada) final = "far fa-check-circle text-success";
+                                                else final = "far fa-times-circle text-danger";
+                                            }
+                                            <span class="font-weight-bold">Finalizada: <i class="@final"></i></span>
+                                            <br />
+                                            <div class="modal fade" id="descricaoModal_@count" tabindex="-1" role="dialog" aria-labelledby="descricaoModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="descricaoModalLabel">Descrição da Intervenção</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            @foreach (var desc in intervencoes.descricaoIntervencao)
+                                                            {
+                                                                <p>@desc</p>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @{
+                                                if (intervencoes.descricaoIntervencao.Count() != 0)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger float-right" data-toggle="modal" data-target="#descricaoModal_@count">
+                                                        Descrição
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger float-right" data-toggle="modal" data-target="#descricaoModal_@count" disabled>
+                                                        Descrição
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+                @foreach (var avar in Model.listaAvarias)
+                {
+                    count++;
+                    int i = 0;
+                    int j = 0;
+
+                    if (avar.dataRegisto.ToString("dd/MM/yyyy").Equals(hrs.ToString("dd/MM/yyyy")))
+                    {
+                        <div class="card histCard shadow-sm border-light pl-0 pt-3 pr-0 pb-3 col-5 d-inline-block mb-3 ml-5 mr-4">
+                            <div class="row no-gutters">
+                                <div class="col-5 text-center border-right border-black-50">
+                                    <i class="fas fa-exclamation-triangle text-danger fa-5x"></i>
+                                    <br />
+                                    <p class="font-weight-bold mb-0 mt-3">@equipamento.serialNumber</p>
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body text-left pt-0 pb-0 pl-3">
+                                        <h4 class="font-weight-bold">Avaria</h4>
+
+                                        <span class="font-weight-bold">Data: <span class="font-weight-normal cardDate">@avar.dataRegisto.ToString("dd/MM/yyyy")</span></span>
+                                        <br />
+                                        <br />
+                                        <div class="float-right">
+                                            <div class="modal fade" id="descricaoModal_@count" tabindex="-1" role="dialog" aria-labelledby="descricaoModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="descricaoModalLabel">Descrição da Avaria</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>@avar.descricao</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @{
+                                                if (!String.IsNullOrEmpty(avar.descricao))
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#descricaoModal_@count">
+                                                        Descrição
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#descricaoModal_@count" disabled>
+                                                        Descrição
+                                                    </button>
+                                                }
+                                            }
+
+                                            @{
+                                                if (avar.imagens.Length > 0)
+                                                {
+                                                    <div class="modal fade" id="fotoModal_@count" tabindex="-1" role="dialog" aria-labelledby="fotoModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="fotoModalLabel">Descrição Gráfica da Avaria</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div id="carousel_@count" class="carousel slide" data-ride="carousel">
+                                                                        <div class="carousel-inner text-center">
+                                                                            @{
+                                                                                if (avar.imagens.Length > 1)
+                                                                                {
+                                                                                    foreach (var img in avar.imagens)
+                                                                                    {
+                                                                                        if (i == 0)
+                                                                                        {
+                                                                                            <div class="carousel-item active">
+                                                                                                <img class="d-block w-100" src="@img">
+                                                                                            </div>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <div class="carousel-item">
+                                                                                                <img class="d-block w-100" src="@img">
+                                                                                            </div>
+                                                                                        }
+                                                                                        i++;
+                                                                                    }
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <img class="d-block w-100" src="@avar.imagens[0]">
+                                                                                }
+                                                                            }
+                                                                        </div>
+                                                                        @{
+                                                                            if (avar.imagens.Length > 1)
+                                                                            {
+                                                                                <a class="carousel-control-prev" href="#carousel_@count" role="button" data-slide="prev">
+                                                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                                                    <span class="sr-only">Previous</span>
+                                                                                </a>
+                                                                                <a class="carousel-control-next" href="#carousel_@count" role="button" data-slide="next">
+                                                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                                                    <span class="sr-only">Next</span>
+                                                                                </a>
+                                                                            }
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#fotoModal_@count">
+                                                        Imagens
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#fotoModal_@count" disabled>
+                                                        Imagens
+                                                    </button>
+                                                }
+                                            }
+
+                                            @{
+                                                if (avar.videos.Length > 0)
+                                                {
+                                                    <div class="modal fade" id="videoModal_@count" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="videoModalLabel">Descrição Gráfica da Avaria</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div id="carouselVid_@count" class="carousel slide" data-ride="carousel">
+                                                                        <div class="carousel-inner text-center">
+                                                                            @{
+                                                                                if (avar.videos.Length > 1)
+                                                                                {
+                                                                                    foreach (var vid in avar.videos)
+                                                                                    {
+                                                                                        if (j == 0)
+                                                                                        {
+                                                                                            <div class="carousel-item active">
+                                                                                                <video width="320" height="240" controls>
+                                                                                                    <source src="@vid" type="video/mp4">
+                                                                                                    <source src="@vid" type="video/mov">
+                                                                                                    <source src="@vid" type="video/3gp">
+                                                                                                </video>
+                                                                                            </div>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <div class="carousel-item">
+                                                                                                <div class="carousel-item active">
+                                                                                                    <video width="320" height="240" controls>
+                                                                                                        <source src="@vid" type="video/mp4">
+                                                                                                        <source src="@vid" type="video/mov">
+                                                                                                        <source src="@vid" type="video/3gp">
+                                                                                                    </video>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        }
+                                                                                        i++;
+                                                                                    }
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <div class="carousel-item active">
+                                                                                        <video width="320" height="240" controls>
+                                                                                            <source src="@avar.videos[0]" type="video/mp4">
+                                                                                            <source src="@avar.videos[0]" type="video/mov">
+                                                                                            <source src="@avar.videos[0]" type="video/3gp">
+                                                                                        </video>
+                                                                                    </div>
+                                                                                }
+                                                                            }
+                                                                        </div>
+                                                                        @{
+                                                                            if (avar.videos.Length > 1)
+                                                                            {
+                                                                                <a class="carousel-control-prev" href="#carouselVid_@count" role="button" data-slide="prev">
+                                                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                                                    <span class="sr-only">Previous</span>
+                                                                                </a>
+                                                                                <a class="carousel-control-next" href="#carouselVid_@count" role="button" data-slide="next">
+                                                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                                                    <span class="sr-only">Next</span>
+                                                                                </a>
+                                                                            }
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#videoModal_@count">
+                                                        Videos
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#videoModal_@count" disabled>
+                                                        Videos
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>
+
+<script>
+    /*Ajustes de resize*/
+    $(document).ready(function () {
+        if ($(window).width() < 1200) {
+            $("#dataFilter").removeClass("offset-10");
+            $("#dataFilter").find(".btn").removeClass("col-12");
+            $("#mobile-card").removeClass("d-none");
+            $(".histCard").removeClass("col-5 ml-5 mr-4");
+            $(".histContainer").removeClass("ml-3");
+            $("#web-card").addClass("d-none");
+            $(".histCard").addClass("col-12");
+            $("#dataFilter").find(".btn").addClass("float-right");
+        }
+        else {
+            $("#dataFilter").find(".btn").removeClass("float-right");
+            $("#web-card").removeClass("d-none");
+            $(".histCard").removeClass("col-12");
+            $("#mobile-card").addClass("d-none");
+            $(".histCard").addClass("col-5 ml-5 mr-4");
+            $(".histContainer").addClass("ml-3");
+            $("#dataFilter").addClass("offset-10");
+            $("#dataFilter").find(".btn").addClass("col-12");
+        }
+    });
+
+    $(document).ready(function () {
+        $(window).resize(function () {
+            if ($(this).width() < 1200) {
+                $("#dataFilter").removeClass("offset-10");
+                $("#dataFilter").find(".btn").removeClass("col-12");
+                $("#mobile-card").removeClass("d-none");
+                $(".histCard").removeClass("col-5 ml-5 mr-4");
+                $(".histContainer").removeClass("ml-3");
+                $("#web-card").addClass("d-none");
+                $(".histCard").addClass("col-12");
+                $("#dataFilter").find(".btn").addClass("float-right");
+            }
+            else {
+                $("#dataFilter").find(".btn").removeClass("float-right");
+                $("#web-card").removeClass("d-none");
+                $(".histCard").removeClass("col-12");
+                $("#mobile-card").addClass("d-none");
+                $(".histCard").addClass("col-5 ml-5 mr-4");
+                $(".histContainer").addClass("ml-3");
+                $("#dataFilter").addClass("offset-10");
+                $("#dataFilter").find(".btn").addClass("col-12");
+            }
+        });
+    });
+
+    /*filtro de datas*/
+    $(document).ready(function () {
+        $('#dropdownMenu').on('click', function () {
+            $("#menu").slideToggle();
+        });
+    });
+
+    $(document).ready(function () {
+        $("body").on("click.Bst", function (event) {
+            if ($("#menu").has(event.target).length == 0 && !$("#menu").is(event.target) && $("dropdownMenu").has(event.target).length == 0 && !$("#dropdownMenu").is(event.target)) {
+                $("#menu").slideUp();
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $("#all").click(function () {
+            $(".histCard").filter(function () {
+                if (!$(this).hasClass("d-inline-block")) {
+                    $(this).addClass("d-inline-block");
+                }
+                $(this).show();
+            });
+
+            $("h4").filter(function () {
+                $(this).show();
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $("#lastweek").click(function () {
+            $(".histCard").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                if ((d.getDate() - 7) < 1) {
+                    var dia = 30 + (d.getDate() - 7);
+                    var lastWeek = d.getMonth() + "/" + dia + "/" + d.getFullYear();
+                }
+                else {
+                    var lastWeek = (d.getMonth() + 1) + "/" + (d.getDate() - 7) + "/" + d.getFullYear();
+                }
+
+                var cardtxt = $(this).find(".cardDate").text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastWeek);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    if (!$(this).hasClass("d-inline-block")) {
+                        $(this).addClass("d-inline-block");
+                    }
+                    $(this).show();
+                }
+                else {
+                    if ($(this).hasClass("d-inline-block")) {
+                        $(this).removeClass("d-inline-block");
+                    }
+                    $(this).hide();
+                }
+            });
+
+            $("h4").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                if ((d.getDate() - 7) < 1) {
+                    var dia = 30 + (d.getDate() - 7);
+                    var lastWeek = d.getMonth() + "/" + dia + "/" + d.getFullYear();
+                }
+                else {
+                    var lastWeek = (d.getMonth() + 1) + "/" + (d.getDate() - 7) + "/" + d.getFullYear();
+                }
+
+                var cardtxt = $(this).text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastWeek);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    $(this).show();
+                }
+                else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $("#lastmonth").click(function () {
+            $(".histCard").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var lastMonth = d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var cardtxt = $(this).find(".cardDate").text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastMonth);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    if (!$(this).hasClass("d-inline-block")) {
+                        $(this).addClass("d-inline-block");
+                    }
+                    $(this).show();
+                }
+                else {
+                    if ($(this).hasClass("d-inline-block")) {
+                        $(this).removeClass("d-inline-block");
+                    }
+                    $(this).hide();
+                }
+            });
+
+            $("h4").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var lastMonth = d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var cardtxt = $(this).text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastMonth);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    $(this).show();
+                }
+                else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $("#lastyear").click(function () {
+            $(".histCard").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var lastYear = (d.getMonth() + 1) + "/" + d.getDate() + "/" + (d.getFullYear() - 1);
+
+                var cardtxt = $(this).find(".cardDate").text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastYear);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    if (!$(this).hasClass("d-inline-block")) {
+                        $(this).addClass("d-inline-block");
+                    }
+                    $(this).show();
+                }
+                else {
+                    if ($(this).hasClass("d-inline-block")) {
+                        $(this).removeClass("d-inline-block");
+                    }
+                    $(this).hide();
+                }
+            });
+
+            $("h4").filter(function () {
+                var d = new Date();
+
+                var today = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+                var lastYear = (d.getMonth() + 1) + "/" + d.getDate() + "/" + (d.getFullYear() - 1);
+
+                var cardtxt = $(this).text();
+                var split = cardtxt.split("/");
+                var date3 = split[1] + "/" + split[0] + "/" + split[2];
+
+                var fDate, lDate, cDate;
+                lDate = Date.parse(today);
+                fDate = Date.parse(lastYear);
+                cDate = Date.parse(date3);
+
+                if (cDate >= fDate && cDate <= lDate) {
+                    $(this).show();
+                }
+                else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+
+    /*verifica se input horas tem um valor maior que as horas atuais do equipamento*/
+    $(document).ready(function () {
+        $('#equip_horas').keyup(function () {
+            var horas = $(this)[0].value;
+            if (horas < @equipamento.currentHours) {
+                if (!$("#equip_horas_btn").is(":disabled")) {
+                    $("#equip_horas_btn").prop("disabled", true);
+                }
+
+                if ($("#inputCheck").hasClass("d-none")) {
+                    $("#inputCheck").removeClass("d-none");
+                }
+            }
+            else {
+                if ($("#equip_horas_btn").is(":disabled")) {
+                    $("#equip_horas_btn").prop("disabled", false);
+                }
+
+                if (!$("#inputCheck").hasClass("d-none")) {
+                    $("#inputCheck").addClass("d-none");
+                }
+            }
+        });
+    });
+
+    /*verifica se input descrição avaria tem um valor*/
+    $(document).ready(function () {
+        $('#descAvaria').keyup(function () {
+            var horas = $(this)[0].value;
+            if (!horas) {
+                if (!$("#avaria_btn").is(":disabled")) {
+                    $("#avaria_btn").prop("disabled", true);
+                }
+            }
+            else {
+                if ($("#avaria_btn").is(":disabled")) {
+                    $("#avaria_btn").prop("disabled", false);
+                }
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $('#descAvariaMobile').keyup(function () {
+            var horas = $(this)[0].value;
+            if (!horas) {
+                if (!$("#avaria_btn_mobile").is(":disabled")) {
+                    $("#avaria_btn_mobile").prop("disabled", true);
+                }
+            }
+            else {
+                if ($("#avaria_btn_mobile").is(":disabled")) {
+                    $("#avaria_btn_mobile").prop("disabled", false);
+                }
+            }
+        });
+    });
+
+    /*mostra mensagem de erro se o post não foi sucedido*/
+    $(document).ready(function () {
+        if (@Model.resultadoPost == 400) {
+            $("#error400").removeClass("d-none");
+        }
+
+        if (@Model.resultadoPost == 404) {
+            $("#error404").removeClass("d-none");
+        }
+    });
+
+    /*Faz o nome dos ficheiros aparecer no input*/
+    $(document).ready(function () {
+        $("#inputFile").on("change", function () {
+            var elem = document.getElementById("inputFile");;
+            var names = [];
+            for (var i = 0; i < elem.files.length; ++i) {
+                if (i == elem.files.length - 1) {
+                    names.push(elem.files[i].name);
+                }
+                else {
+                    names.push(elem.files[i].name + ", ");
+                }
+            }
+            $(this).siblings(".custom-file-label").addClass("selected overflow-hidden").html(names);
+        });
+    });
+
+    $(document).ready(function () {
+        $("#inputFileMobile").on("change", function () {
+            var elem = document.getElementById("inputFileMobile");;
+            var names = [];
+            for (var i = 0; i < elem.files.length; ++i) {
+                if (i == elem.files.length - 1) {
+                    names.push(elem.files[i].name);
+                }
+                else {
+                    names.push(elem.files[i].name + ", ");
+                }
+            }
+            $(this).siblings(".custom-file-label").addClass("selected overflow-hidden").html(names);
+        });
+    });
+
+    /*restringe o tipo de ficheiros a carregar no report de avarias*/
+    $(document).ready(function () {
+        $("#inputFile").on("change", function () {
+            var ext = $(this).val().split('.').pop().toLowerCase();
+            if (ext !== 'jpg' && ext !== 'jpeg' && ext !== 'png' && ext !== 'mov' && ext !== 'mp4' && ext !== '3gp') {
+                alert('Please upload excel file only.');
+                return false;
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $("#inputFileMobile").on("change", function () {
+            var ext = $(this).val().split('.').pop().toLowerCase();
+            if (ext !== 'jpg' && ext !== 'jpeg' && ext !== 'png' && ext !== 'mov' && ext !== 'mp4' && ext !== '3gp') {
+                alert('Please upload excel file only.');
+                return false;
+            }
+        });
+    });
+</script>
+
+

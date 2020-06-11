@@ -1,0 +1,85 @@
+﻿@model IEnumerable<Fatura>
+
+@{
+    ViewData["Title"] = "Faturação";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4 class="border-bottom border-danger mb-3">Faturação</h4>
+
+@if (!Model.Any())
+{
+    <h4>Não tem faturas pendentes.</h4>
+}
+else
+{
+    @foreach (var item in Model)
+    {
+        <div class="card shadow-sm border-light pl-3 pt-3 pr-0 pb-3 col-5 d-inline-block mb-3 ml-5 mr-4">
+            <div class="row no-gutters">
+                <div class="col-7 border-right border-black-50">
+                    <div class="card-body text-left pt-0 pb-0 pl-3">
+                        <h3 class="font-weight-bold">@item.diario</h3>
+
+                        <span class="font-weight-bold">Valor: <span class="font-weight-normal">@item.totalAmount &euro;</span></span>
+                        <br />
+                        <span class="font-weight-bold vlrliquidado">Valor Liquidado: </span><span class="font-weight-normal">@item.paidAmount &euro;</span>
+                        <br />
+                        <span class="font-weight-bold dtemissao">Data Emissão: </span><span class="font-weight-normal">@item.issueDate.ToString("dd/MM/yyyy")</span>
+                        <br />
+                        <span class="font-weight-bold dttermino">Data Termino: </span><span class="font-weight-normal">@item.dueDate.ToString("dd/MM/yyyy")</span>
+                        <br />
+                    </div>
+                </div>
+                <div class="col-5 d-flex justify-content-center text-center">
+                    <a href="@item.docURL" target="_blank">
+                        <button class="btn btn-link w-100">
+                            <i class="fas fa-file-download text-danger fa-7x"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<script>
+     /*ajustes de resize*/
+    $(document).ready(function () {
+        if ($(window).width() < 992) {
+            $(".card").removeClass("col-5 ml-5 mr-4");
+            $(".card").addClass("col-12");
+            $(".dtemissao").text("Emissão: ");
+            $(".dttermino").text("Termino: ");
+            $(".vlrliquidado").text("Liquidado: ");
+        }
+        else {
+            $(".card").removeClass("col-12");
+            $(".card").addClass("col-5 ml-5 mr-4");
+            $(".dtemissao").text("Data de Emissão: ");
+            $(".dttermino").text("Data de Termino: ");
+            $(".vlrliquidado").text("Valor Liquidado: ");
+        }
+    });
+
+    $(document).ready(function () {
+        $(window).resize(function () { 
+            if ($(this).width() < 992) {
+                $(".card").removeClass("col-5 ml-5 mr-4");
+                $(".card").addClass("col-12");
+                $(".dtemissao").text("Dt. Emissão: ");
+                $(".dtemissao").text("Emissão: ");
+                $(".dttermino").text("Termino: ");
+                $(".vlrliquidado").text("Liquidado: ");
+            }
+            else { 
+                $(".card").removeClass("col-12");
+                $(".card").addClass("col-5 ml-5 mr-4");
+                $(".dtemissao").text("Data de Emissão: ");
+                $(".dttermino").text("Data de Termino: ");
+                $(".vlrliquidado").text("Valor Liquidado: ");
+            }
+        });
+    });
+</script>
+

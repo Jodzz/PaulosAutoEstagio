@@ -1,0 +1,174 @@
+﻿@{
+    ViewData["Title"] = "Contactos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .mapouter {
+        position: relative;
+        text-align: right;
+        height: 500px;
+        width: 600px;
+    }
+
+    .gmap_canvas {
+        overflow: hidden;
+        background: none !important;
+        height: 500px;
+        width: 600px;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5);
+    }
+</style>
+
+<h4 class="border-bottom border-danger">Contactos</h4>
+
+<div class="row infoRow">
+    <div class="infoCol col-3 mt-5">
+        <p class="font-weight-bold">PaulosAuto, Lda.</p>
+
+            <p>Recta do Caçador<br />
+
+            Km. 3,6<br />
+
+            Apartado 5092<br />
+
+            3501-907 Viseu Portugal</p>
+
+        <p class="font-weight-bold">GPS</p>
+
+            <p>40°38'34.6"N 7°51'49.8"W<br />
+
+            40.642945, -7.863837</p>
+
+        <p class="font-weight-bold">Contacto Comercial</p>
+
+            <p>comercial@paulosauto.pt</p>
+    </div>
+    <div class="infoCol2 col-2 mt-5">
+        <p class="font-weight-bold">Contacto Geral</p>
+        
+            <p>Tel   232 470 600<br />
+
+            Fax   232 105 127<br />
+
+            geral@paulosauto.pt</p>
+
+        <p class="font-weight-bold">Assistência Técnica</p>
+
+            <p>Tel   232 470 603<br />
+
+            Fax   232 105 127<br />
+
+            assistencia@paulosauto.pt</p>
+    </div>
+    <div class="mapouter col-7 clearfix">
+        <div class="gmap_canvas float-right">
+            <iframe style="width:100%; height:400px;" id="gmap_canvas" src="https://maps.google.com/maps?q=paulos%20auto&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+            <a href="https://www.embedgooglemap.net/en/"></a>
+        </div>
+    </div>
+</div>
+<div class="row formRow col-12 mx-auto mt-n5">
+    <div class="card shadow-sm border-light col-12">
+        <h3 class="font-weight-bold m-3">Fale Conosco</h3>
+        <form class="row col-12" action="mailto:geral@paulosauto.pt" method="post" enctype="text/plain">
+            <div class="col-6 formCol">
+                <div class="form-group">
+                    <label for="nome" class="font-weight-bold">Nome</label>
+                    <input type="text" class="form-control border-danger" id="nome" name="Nome">
+                </div>
+                <div class="form-group">
+                    <label for="nrtel" class="font-weight-bold">Telefone</label>
+                    <input type="number" class="form-control border-danger" id="nrtel" name="Telefone">
+                </div>
+                <div class="form-group">
+                    <label for="email" class="font-weight-bold">E-mail</label>
+                    <input type="email" class="form-control border-danger" id="email" name="E-mail">
+                </div>
+            </div>
+            <div class="col-6 formCol">
+                <div class="form-group">
+                    <label for="msg" class="font-weight-bold">Mensagem</label>
+                    <textarea class="form-control border-danger" id="msg" name="Mensagem" rows="5"></textarea>
+                </div>
+                <button type="submit" class="btn btn-outline-danger col-12">Enviar</button>
+                <small class="form-text text-muted">Os seus dados pessoais não serão partilhados.</small>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    /*Ajustes de resize*/
+    $(document).ready(function () {
+        if ($(window).width() < 1200) {
+            $(".infoCol").removeClass("col-3 mt-5");
+            $(".infoCol2").removeClass("col-2 mt-5");
+            $(".formCol").removeClass("col-6");
+            $(".formCol").addClass("col-12");
+            $(".formRow").addClass("mb-3");
+            $(".card").addClass("pb-5");
+            $(".mapouter").addClass("d-none");
+            $(".infoRow").addClass("pb-5 mx-auto");
+            $(".infoCol").addClass("mx-auto");
+            $(".infoCol2").addClass("mx-auto");
+        }
+        else {
+            $(".infoCol").removeClass("mx-auto");
+            $(".infoCol2").removeClass("mx-auto");
+            $(".infoRow").removeClass("pb-5 mx-auto");
+            $(".mapouter").removeClass("d-none");
+            $(".formRow").removeClass("mb-3");
+            $(".card").removeClass("pb-5");
+            $(".formCol").removeClass("col-12");
+            $(".formCol").addClass("col-6");
+            $(".infoCol").addClass("col-3 mt-5");
+            $(".infoCol2").addClass("col-2 mt-5");
+        }
+    });
+
+    $(document).ready(function () {
+        $(window).resize(function () {
+            if ($(this).width() < 1200) {
+                $(".infoCol").removeClass("col-3 mt-5");
+                $(".infoCol2").removeClass("col-2 mt-5");
+                $(".formCol").removeClass("col-6");
+                $(".formCol").addClass("col-12");
+                $(".formRow").addClass("mb-3");
+                $(".card").addClass("pb-5");
+                $(".mapouter").addClass("d-none");
+                $(".infoRow").addClass("pb-5 mx-auto");
+                $(".infoCol").addClass("mx-auto");
+                $(".infoCol2").addClass("mx-auto");
+            }
+            else {
+                $(".infoCol").removeClass("mx-auto");
+                $(".infoCol2").removeClass("mx-auto");
+                $(".infoRow").removeClass("pb-5 mx-auto");
+                $(".mapouter").removeClass("d-none");
+                $(".formRow").removeClass("mb-3");
+                $(".card").removeClass("pb-5");
+                $(".formCol").removeClass("col-12");
+                $(".formCol").addClass("col-6");
+                $(".infoCol").addClass("col-3 mt-5");
+                $(".infoCol2").addClass("col-2 mt-5");
+            }
+        });
+    });
+
+    /*Esconte link de logout caso user não tenha feito login*/
+    $(document).ready(function () {
+        if (@ViewBag.Message == 0) {
+            $("#logoutLink").hide();
+        }
+        else {
+            $("#logoutLink").show();
+        }  
+    });
+</script>
+
+
+

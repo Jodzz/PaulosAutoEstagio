@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Políticas de Cookies";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4 class="border-bottom border-danger">Políticas de cookies</h4>
+
+<p>Este site utiliza cookies para melhorar a funcionalidade e a sua experiência de utilização do mesmo. 
+Os cookies servem, por exemplo, para identificar o seu dispositivo de acesso, o que é útil para garantir 
+acesso a todas as áreas do site ou para assegurar algumas funcionalidades em particular. 
+Ao navegar neste site está a consentir a utilização de cookies.</p>
+
+<p class="font-weight-bold">1. O que são cookies?</p>
+
+    <p>“Cookies” são pequenas etiquetas de software que são armazenadas no seu computador através do navegador (browser), 
+    retendo apenas informação relacionada com as suas preferências, não incluindo quaisquer dados pessoais.</p>
+
+<p class="font-weight-bold">2. Para que servem os Cookies?</p>
+
+    <p>Os cookies servem para ajudar a determinar a utilidade, interesse e o número de utilizações dos websites, 
+    permitindo uma navegação mais rápida e eficiente, eliminando a necessidade de introduzir repetidamente as mesmas 
+    informações.</p>
+
+<p class="font-weight-bold">3. Que tipo de cookies utiliza a PaulosAuto neste site?</p>
+
+    <p>São utilizados apenas cookies analíticos, que recolhem informação estatística e anónima acerca da navegação no 
+    site da PaulosAuto. O objetivo é analisar padrões de tráfego, permitindo identificar problemas e melhorar o
+    funcionamento do site.</p>
+
+<p class="font-weight-bold">4. Como pode gerir os cookies?</p>
+
+    <p>Todos os browsers permitem ao utilizador aceitar, recusar ou apagar cookies, nomeadamente através da seleção das 
+    definições apropriadas no respetivo navegador. Pode configurar os cookies no menu “opções” ou “preferências” 
+    do seu browser.</p>
+
+    <p>Note-se, no entanto, que, ao desativar cookies, pode impedir que alguns serviços da web funcionem corretamente, 
+    afetando, parcial ou totalmente, a navegação no website.</p>
+
+<p class="font-weight-bold">5. Uso de cookies na abertura das nossas newsletters.</p>
+
+    <p>As nossas newsletters podem, para fins estatísticos, conter um único “pixel” que nos permite saber se são abertas 
+    e verificar os cliques através de links ou anúncios dentro da newsletter. Pode obter mais informações sobre cookies 
+    no seguinte link: https://www.allaboutcookies.org”</p>
+
+    <p>A presente política de privacidade e proteção de dados pode ser consultada em PDF aqui.</p>
+
+<script>
+    /*Esconte link de logout caso user não tenha feito login*/
+    $(document).ready(function () {
+        if (@ViewBag.Message == 0) {
+            $("#logoutLink").hide();
+        }
+        else {
+            $("#logoutLink").show();
+        }
+    });
+</script>

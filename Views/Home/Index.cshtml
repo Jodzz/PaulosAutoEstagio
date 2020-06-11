@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "PaulosAuto, Lda. - Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #logoutLink{
+        display:none;
+    }
+
+    .form-control:focus{
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5);
+    }
+</style>
+
+<div class="row d-flex align-items-center mt-5">
+    <div class="col-6 text-center loginCol mt-5">
+        <h1>Bem Vindo!</h1>
+        <p>Conheça as nossas <a asp-controller="Home" asp-action="Privacy">Politícas de Privacidade</a> e <a asp-controller="Home" asp-action="Cookies">Políticas de Cookies</a>.</p>
+        <a asp-controller="Home" asp-action="Contactos">Contacte-nos!</a>
+    </div>
+    <div class="col-6 align-middle d-inline-block loginCol mt-5">
+        <div class="card shadow-sm border-light p-3">
+            <div class="card-body">
+                <form class="text-center" asp-action="FazerLogin" method="POST">
+                    <h2 class="font-weight-bold">Login</h2>
+                    <p id="erro401" role="alert" class="alert alert-danger d-none text-center">Dados de Login inválidos.</p>
+                    <p id="error404" role="alert" class="alert alert-danger d-none erros text-center">De momento não é possível aceder ao servidor.</p>
+                    <div class="form-group">
+                        <label for="email" class="font-weight-bold float-left">E-mail</label>
+                        <input type="email" class="form-control border-danger" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="font-weight-bold float-left">Password</label>
+                        <input type="password" class="form-control border-danger" id="password" name="password">
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger col-12">Login</button>
+                    <a class="float-right mt-3" asp-action="MudarPassword">Esqueceu-se da sua password?</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+     /*ajustes de resize*/
+    $(document).ready(function () {
+        if ($(window).width() < 1200) {
+            $(".loginCol").removeClass("col-6");
+            $(".loginCol").addClass("col-12 mt-3");
+        }
+        else {
+            $(".loginCol").removeClass("col-12 mt-3");
+            $(".loginCol").addClass("col-6");
+        }
+    });
+
+    $(document).ready(function () {
+        $(window).resize(function () {
+            if ($(this).width() < 1200) {
+                $(".loginCol").removeClass("col-6");
+                $(".loginCol").addClass("col-12 mt-3");
+            }
+            else
+            {
+                $(".loginCol").removeClass("col-12 mt-3");
+                $(".loginCol").addClass("col-6");
+            }
+        });
+    });
+
+    /*mensagens de erro*/
+    $(document).ready(function () {
+        if (@ViewBag.Message == 401) {
+            $("#erro401").removeClass("d-none");
+        }
+
+        if (@ViewBag.Message == 404) {
+            $("#erro404").removeClass("d-none");
+        }
+    });
+</script>
